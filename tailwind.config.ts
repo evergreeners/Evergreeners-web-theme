@@ -90,9 +90,9 @@ export default {
         },
       },
       animation: {
-        "fade-in": "fade-in 0.5s ease-out",
-        "fade-up": "fade-up 0.6s ease-out",
-        "scale-in": "scale-in 0.3s ease-out",
+        "fade-in": "fade-in 0.5s ease-out both",
+        "fade-up": "fade-up 0.6s ease-out both",
+        "scale-in": "scale-in 0.3s ease-out both",
         "pulse-slow": "pulse 3s ease-in-out infinite",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
       },
