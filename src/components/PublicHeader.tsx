@@ -1,45 +1,53 @@
-
 import { Link } from "react-router-dom";
-import logo from "@/assets/logo.png";
 import { cn } from "@/lib/utils";
+import { Book, Newspaper, LogIn, ArrowRight } from "lucide-react";
+import { Logo } from "./Logo";
 
 export function PublicHeader() {
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl supports-[backdrop-filter]:bg-black/20">
-            <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                <div className="flex items-center gap-8">
-                    <Link to="/" className="flex items-center gap-2 group">
-                        <img
-                            src={logo}
-                            alt="Evergreeners"
-                            className="w-8 h-8 object-contain"
-                        />
-                        <span className="font-bold text-foreground tracking-tight text-lg">Forever Green</span>
-                    </Link>
+        <header className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
+            <div className="w-full max-w-4xl bg-black/60 backdrop-blur-xl border border-white/10 rounded-full pl-6 pr-2 py-2 flex items-center justify-between shadow-2xl shadow-black/50 transition-all duration-300 hover:border-white/20 hover:bg-black/70">
 
-                    <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-                        <a href="#" className="hover:text-foreground transition-colors">Documentation</a>
+                {/* Logo Section */}
+                <Link to="/" className="flex items-center gap-3 group">
+                    <div className="relative flex items-center justify-center w-10 h-10">
+                        {/* 6x6 Grid Logo - Contribution Graph Style */}
+                        <Logo className="w-6 h-6" />
+                    </div>
+                    <span className="font-bold text-foreground tracking-tight text-lg group-hover:text-green-400 transition-colors">Forever Green</span>
+                </Link>
 
-                        <a href="#" className="hover:text-foreground transition-colors">Blog</a>
-                    </nav>
-                </div>
+                {/* Navigation - Centered (Hidden on mobile) */}
+                <nav className="hidden md:flex items-center gap-1 bg-white/5 rounded-full px-2 py-1 border border-white/5">
+                    <a href="#" className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-white hover:bg-white/5 rounded-full transition-all">
+                        <Book className="w-4 h-4" />
+                        <span>Documentation</span>
+                    </a>
+                    <div className="w-px h-4 bg-white/10" />
+                    <a href="#" className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-white hover:bg-white/5 rounded-full transition-all">
+                        <Newspaper className="w-4 h-4" />
+                        <span>Blog</span>
+                    </a>
+                </nav>
 
-                <div className="flex items-center gap-4">
+                {/* Actions */}
+                <div className="flex items-center gap-2 pl-4">
                     <Link
                         to="/login"
-                        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                        className="hidden sm:flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-white px-3 py-2 transition-colors"
                     >
-                        Sign In
+                        <LogIn className="w-4 h-4" />
+                        <span>Sign In</span>
                     </Link>
                     <Link
                         to="/signup"
                         className={cn(
-                            "px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300",
-                            "bg-primary text-black hover:bg-primary/90 hover:scale-105 active:scale-95",
-                            "shadow-[0_0_20px_-5px_hsl(var(--primary))]"
+                            "group flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300",
+                            "bg-primary text-black hover:bg-[#5aff94] hover:scale-105 active:scale-95 active:rotate-1"
                         )}
                     >
-                        Get Started
+                        <span>Start</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </Link>
                 </div>
             </div>
