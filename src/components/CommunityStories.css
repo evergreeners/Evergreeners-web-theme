@@ -1,0 +1,163 @@
+.story-card {
+    position: relative;
+    width: 300px;
+    height: 450px;
+    /* Taller to match the screenshot aspect ratio */
+    flex-shrink: 0;
+    border-radius: 24px;
+    /* More rounded corners */
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: hidden;
+    transition: all 0.4s ease-out;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+    /* Constant green border as requested in the image */
+    border: 1px solid rgba(74, 222, 128, 0.5);
+    margin-right: 2rem;
+    /* Default Green Glow */
+    box-shadow: 0 10px 30px rgba(0, 255, 65, 0.15);
+}
+
+.story-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    /* Stronger glow on hover */
+    box-shadow: 0 20px 40px rgba(0, 255, 65, 0.25);
+    border-color: rgba(74, 222, 128, 0.9);
+}
+
+.story-card__content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 32px 24px;
+    box-sizing: border-box;
+
+    /* Persistent Gradient Overlay - stronger at bottom for text readability */
+    background: linear-gradient(to bottom,
+            rgba(0, 0, 0, 0.1) 0%,
+            rgba(0, 0, 0, 0.2) 40%,
+            rgba(0, 0, 0, 0.85) 80%,
+            rgba(0, 0, 0, 0.95) 100%);
+
+    /* Visible by default now */
+    opacity: 1;
+    transform: translateY(0);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    text-align: left;
+}
+
+.story-card__title {
+    margin: 0;
+    font-size: 28px;
+    /* Larger as per image */
+    color: #fff;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+}
+
+.story-card__role {
+    font-size: 13px;
+    font-weight: 700;
+    color: #4ade80;
+    /* Primary Green */
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 6px;
+    margin-bottom: 0;
+    /* Bottom aligned like image */
+}
+
+.story-card__description {
+    margin: 0;
+    font-size: 17px;
+    color: #e5e5e5;
+    line-height: 1.5;
+    font-style: italic;
+    margin-bottom: 24px;
+    /* Space between quote and name */
+    font-weight: 500;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* --- CYBER PATTERN BACKGROUND --- */
+.cyber-pattern {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #050505;
+
+    background-image:
+        radial-gradient(circle at center, transparent 30%, #000 90%),
+        linear-gradient(rgba(74, 222, 128, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74, 222, 128, 0.07) 1px, transparent 1px),
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+
+    background-size:
+        100% 100%,
+        60px 60px,
+        60px 60px,
+        20px 20px,
+        20px 20px;
+
+    animation: cyber-move 20s linear infinite;
+    z-index: 0;
+    pointer-events: none;
+}
+
+@keyframes cyber-move {
+    0% {
+        background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
+    }
+
+    100% {
+        background-position: 0 0, 60px 60px, 60px 60px, 40px 40px, 40px 40px;
+    }
+}
+
+/* --- INFINITE MARQUEE --- */
+.marquee-container {
+    display: flex;
+    overflow: hidden;
+    width: 100%;
+    padding-top: 4rem;
+    padding-bottom: 2rem;
+    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+    position: relative;
+    z-index: 10;
+}
+
+.marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll 50s linear infinite;
+    /* Slower for better readability since text is always visible */
+}
+
+/* Hover pause removed as requested */
+/* .marquee-container:hover .marquee-track {
+    animation-play-state: paused;
+} */
+
+@keyframes marquee-scroll {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}

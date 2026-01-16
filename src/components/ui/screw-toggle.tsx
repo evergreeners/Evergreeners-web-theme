@@ -281,27 +281,26 @@ export const ScrewToggle: React.FC<ScrewToggleProps> = (props) => {
                                         <span data-label="G" style={{ "--i": 1 } as React.CSSProperties}>G</span>
                                         <span data-label="e" style={{ "--i": 2 } as React.CSSProperties}>e</span>
                                         <span data-label="t" style={{ "--i": 3 } as React.CSSProperties}>t</span>
-                                        <span data-label="S" style={{ "--i": 4 } as React.CSSProperties}>S</span>
-                                        <span data-label="t" style={{ "--i": 5 } as React.CSSProperties}>t</span>
-                                        <span data-label="a" style={{ "--i": 6 } as React.CSSProperties}>a</span>
-                                        <span data-label="r" style={{ "--i": 7 } as React.CSSProperties}>r</span>
-                                        <span data-label="t" style={{ "--i": 8 } as React.CSSProperties}>t</span>
-                                        <span data-label="e" style={{ "--i": 9 } as React.CSSProperties}>e</span>
-                                        <span data-label="d" style={{ "--i": 10 } as React.CSSProperties}>d</span>
+                                        <span data-label="&nbsp;" style={{ "--i": 4 } as React.CSSProperties}>&nbsp;</span>
+                                        <span data-label="S" style={{ "--i": 5 } as React.CSSProperties}>S</span>
+                                        <span data-label="t" style={{ "--i": 6 } as React.CSSProperties}>t</span>
+                                        <span data-label="a" style={{ "--i": 7 } as React.CSSProperties}>a</span>
+                                        <span data-label="r" style={{ "--i": 8 } as React.CSSProperties}>r</span>
+                                        <span data-label="t" style={{ "--i": 9 } as React.CSSProperties}>t</span>
+                                        <span data-label="e" style={{ "--i": 10 } as React.CSSProperties}>e</span>
+                                        <span data-label="d" style={{ "--i": 11 } as React.CSSProperties}>d</span>
                                     </span>
 
                                     <span className="st-text st-state-2">
-                                        <span data-label="T" style={{ "--i": 1 } as React.CSSProperties}>T</span>
-                                        <span data-label="i" style={{ "--i": 2 } as React.CSSProperties}>i</span>
-                                        <span data-label="m" style={{ "--i": 3 } as React.CSSProperties}>m</span>
-                                        <span data-label="e" style={{ "--i": 4 } as React.CSSProperties}>e</span>
-                                        <span data-label="t" style={{ "--i": 5 } as React.CSSProperties}>t</span>
-                                        <span data-label="o" style={{ "--i": 6 } as React.CSSProperties}>o</span>
-                                        <span data-label="S" style={{ "--i": 7 } as React.CSSProperties}>S</span>
-                                        <span data-label="h" style={{ "--i": 8 } as React.CSSProperties}>h</span>
-                                        <span data-label="i" style={{ "--i": 9 } as React.CSSProperties}>i</span>
-                                        <span data-label="n" style={{ "--i": 10 } as React.CSSProperties}>n</span>
-                                        <span data-label="e" style={{ "--i": 11 } as React.CSSProperties}>e</span>
+                                        <span data-label="L" style={{ "--i": 1 } as React.CSSProperties}>L</span>
+                                        <span data-label="e" style={{ "--i": 2 } as React.CSSProperties}>e</span>
+                                        <span data-label="t" style={{ "--i": 3 } as React.CSSProperties}>t</span>
+                                        <span data-label="'" style={{ "--i": 4 } as React.CSSProperties}>'</span>
+                                        <span data-label="s" style={{ "--i": 5 } as React.CSSProperties}>s</span>
+                                        <span data-label="&nbsp;" style={{ "--i": 6 } as React.CSSProperties}>&nbsp;</span>
+                                        <span data-label="G" style={{ "--i": 7 } as React.CSSProperties}>G</span>
+                                        <span data-label="o" style={{ "--i": 8 } as React.CSSProperties}>o</span>
+                                        <span data-label="!" style={{ "--i": 9 } as React.CSSProperties}>!</span>
                                     </span>
                                 </span>
                             </div>
