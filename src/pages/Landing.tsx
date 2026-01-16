@@ -1,6 +1,6 @@
 
 import { PublicHeader } from "@/components/PublicHeader";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
     ArrowRight,
     Github,
@@ -26,12 +26,25 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import dashboardMockup from "@/assets/dashboard-mockup.png";
 import { ScrewToggle } from "@/components/ui/screw-toggle";
+import { CosmicButton } from "@/components/ui/cosmic-button";
+import { TerminalSection } from "@/components/TerminalSection";
+import { CommunityStories } from "@/components/CommunityStories";
 
 export default function Landing() {
     const [text, setText] = useState("");
     const [isDeleting, setIsDeleting] = useState(false);
     const [loopNum, setLoopNum] = useState(0);
     const [typingSpeed, setTypingSpeed] = useState(150);
+    const navigate = useNavigate();
+
+    const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.checked) {
+            // Wait for the animation (Time to Shine reveals) then navigate
+            setTimeout(() => {
+                navigate("/signup");
+            }, 1000);
+        }
+    };
 
     const words = ["Consistency.", "Growth.", "Focus.", "Legacy."];
 
@@ -101,7 +114,7 @@ export default function Landing() {
 
                             <div className="flex flex-col sm:flex-row items-center gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
                                 <div className="scale-75 sm:scale-100 origin-left">
-                                    <ScrewToggle />
+                                    <ScrewToggle onChange={handleToggle} />
                                 </div>
                                 <Link to="/login" className="flex items-center gap-2 text-muted-foreground hover:text-white transition-colors group">
                                     View Demo <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -165,8 +178,12 @@ export default function Landing() {
 
 
                 {/* --- "The Problem" / Chaos vs Order Section --- */}
-                <section className="py-24 bg-white/[0.02] border-y border-white/5 overflow-hidden">
-                    <div className="container mx-auto px-4 max-w-7xl">
+                <section className="py-24 bg-[#050505] overflow-hidden relative">
+                    <div className="cyber-pattern opacity-50" />
+                    <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-black via-black/80 to-transparent z-0 pointer-events-none" />
+                    <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-black via-black/80 to-transparent z-0 pointer-events-none" />
+
+                    <div className="container mx-auto px-4 max-w-7xl relative z-10">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-24 items-center">
                             <div className="space-y-8 order-2 md:order-1">
                                 <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Focus is the new <br /><span className="text-primary/50 line-through decoration-primary">currency</span> <span className="text-white">superpower.</span></h2>
@@ -238,6 +255,7 @@ export default function Landing() {
                     </div>
                 </section>
 
+                <TerminalSection />
 
                 {/* --- Bento Grid Features Section --- */}
                 <section className="py-32 container mx-auto px-4 max-w-7xl">
@@ -292,68 +310,40 @@ export default function Landing() {
                     </div>
                 </section>
 
-                {/* --- Testimonials Section --- */}
-                <section className="py-32 bg-[#050505] border-y border-white/5 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-dot-pattern opacity-10" />
-                    <div className="container mx-auto px-4 max-w-7xl relative z-10">
-                        <div className="text-center mb-16">
-                            <h2 className="text-3xl font-bold mb-4">Community Stories</h2>
-                            <p className="text-muted-foreground">Join 10,000+ developers building their legacy.</p>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <TestimonialCard
-                                quote="I used to code in bursts and burn out. Evergreeners helped me pace myself. Now I've coded for 300 days straight."
-                                author="Sarah J."
-                                role="Senior Engineer"
-                            />
-                            <TestimonialCard
-                                quote="The GitHub sync is magic. It just works. Seeing that green graph fill up is the best dopamine hit."
-                                author="Marcus Chen"
-                                role="Indie Hacker"
-                            />
-                            <TestimonialCard
-                                quote="Leaderboards made it a game for our whole team. Productivity is up 40% since we started tracking."
-                                author="Alex Rivera"
-                                role="CTO @ Startup"
-                            />
-                        </div>
-                    </div>
-                </section>
+                <CommunityStories />
 
 
                 {/* --- FooterLike CTA Section -- */}
-                <section className="border-t border-white/10 bg-[#0F0F0F] relative overflow-hidden">
-                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 h-[500px] bg-gradient-to-t from-primary/5 to-transparent pointer-events-none" />
+                <section className="bg-[#050505] relative overflow-hidden">
+                    {/* Cyber Pattern Background (as requested) */}
+                    <div className="cyber-pattern opacity-50" />
 
-                    <div className="container mx-auto px-4 py-32 max-w-4xl text-center relative z-10">
+                    {/* Overlay gradient for text readability at bottom */}
+                    <div className="absolute inset-x-0 bottom-0 h-[500px] bg-gradient-to-t from-black via-transparent to-transparent pointer-events-none z-10" />
+
+                    <div className="container mx-auto px-4 py-32 max-w-4xl text-center relative z-20">
                         <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-8">
                             Ready to build your <span className="text-primary">legacy?</span>
                         </h2>
                         <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
                             Join thousands of developers who have turned their coding habits into a visual masterpiece. Start your streak today.
                         </p>
-                        <div className="flex flex-col sm:flex-row justify-center gap-6">
+                        <div className="flex justify-center">
                             <Link to="/signup">
-                                <Button size="lg" className="w-full sm:w-auto bg-white text-black hover:bg-white/90 font-bold px-10 h-16 text-lg rounded-full">
+                                <CosmicButton>
                                     Get Started Now
-                                </Button>
-                            </Link>
-                            <Link to="/login">
-                                <Button variant="outline" size="lg" className="w-full sm:w-auto border-white/20 hover:bg-white/5 font-bold px-10 h-16 text-lg bg-transparent text-white rounded-full">
-                                    View Demo
-                                </Button>
+                                </CosmicButton>
                             </Link>
                         </div>
                     </div>
 
-                    <div className="border-t border-white/10 py-12 bg-black">
-                        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+                    <div className="py-12 bg-transparent relative z-20">
+                        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-white/60">
                             <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                                 All systems normal
                             </div>
-                            <div>© 2024 Evergreeners Inc.</div>
+                            <div>© 2026 Evergreeners Inc.</div>
                             <div className="flex gap-8">
                                 <a href="#" className="hover:text-primary transition-colors">Privacy</a>
                                 <a href="#" className="hover:text-primary transition-colors">Terms</a>
