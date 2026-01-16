@@ -1,6 +1,6 @@
 import { Settings, Bell, Menu, Home, BarChart3, Flame, Target, Trophy } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import logo from "@/assets/logo.png";
+import { Logo } from "@/components/Logo";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn, triggerHaptic } from "@/lib/utils";
@@ -24,11 +24,9 @@ export function Header() {
       <div className="glass-nav mt-4 rounded-2xl mx-auto max-w-5xl border border-primary/20 bg-primary/10">
         <div className="flex items-center justify-between py-3 px-4">
           <Link to="/dashboard" className="flex items-center gap-2 group">
-            <img
-              src={logo}
-              alt="Evergreeners"
-              className="w-8 h-8 object-contain transition-transform group-hover:scale-110"
-            />
+            <div className="relative flex items-center justify-center w-10 h-10 -ml-1">
+              <Logo className="w-6 h-6" />
+            </div>
             <span className="font-semibold text-foreground hidden sm:block">Forever Green</span>
           </Link>
 

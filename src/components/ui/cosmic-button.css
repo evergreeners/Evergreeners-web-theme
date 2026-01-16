@@ -192,3 +192,9 @@
         translate: 0 -1px;
     }
 }
+
+@media (max-width: 768px) {
+    .cosmic-highlight {
+        stroke-dashoffset: 0;
+    }
+}
