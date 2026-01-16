@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn, triggerHaptic } from "@/lib/utils";
 
 const navItems = [
-  { icon: Home, label: "Home", href: "/" },
+  { icon: Home, label: "Home", href: "/dashboard" },
   { icon: BarChart3, label: "Analytics", href: "/analytics" },
   { icon: Flame, label: "Streaks", href: "/streaks" },
   { icon: Target, label: "Goals", href: "/goals" },
@@ -23,7 +23,7 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 px-4 md:px-0">
       <div className="glass-nav mt-4 rounded-2xl mx-auto max-w-5xl border border-primary/20 bg-primary/10">
         <div className="flex items-center justify-between py-3 px-4">
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to="/dashboard" className="flex items-center gap-2 group">
             <img
               src={logo}
               alt="Evergreeners"

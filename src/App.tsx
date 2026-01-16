@@ -4,6 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
+import Landing from "./pages/Landing";
+import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
 import Analytics from "./pages/Analytics";
 import Streaks from "./pages/Streaks";
 import Goals from "./pages/Goals";
@@ -23,7 +26,10 @@ const App = () => (
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/dashboard" element={<Index />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/streaks" element={<Streaks />} />
           <Route path="/goals" element={<Goals />} />
