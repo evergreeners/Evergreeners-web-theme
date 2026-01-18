@@ -6,16 +6,11 @@ import {
   ChevronRight, Github, Clock, Eye, RefreshCw, Download
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-<<<<<<< HEAD
 import { signOut, authClient, useSession } from "@/lib/auth-client";
-=======
-import { signOut, useSession } from "@/lib/auth-client";
->>>>>>> 85b1a333534500275d58feb89e85a9052e518ab2
-import { useEffect } from "react";
 
 // ... (existing helper function/interface code)
 
@@ -27,9 +22,14 @@ export default function Settings() {
   const [darkMode, setDarkMode] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
+
   const [isGithubConnected, setIsGithubConnected] = useState(false);
+  const [githubUsername, setGithubUsername] = useState("");
+  const [showDisconnectInfo, setShowDisconnectInfo] = useState(false);
+
   const { data: session } = useSession();
 
+  // Check connection status
   useEffect(() => {
     const checkConnections = async () => {
       try {
@@ -47,12 +47,7 @@ export default function Settings() {
     }
   }, [session]);
 
-  const [isGithubConnected, setIsGithubConnected] = useState(false);
-  const [githubUsername, setGithubUsername] = useState("");
-  const [showDisconnectInfo, setShowDisconnectInfo] = useState(false);
-
-  const { data: session } = useSession();
-
+  // Fetch standard profile settings
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -61,7 +56,7 @@ export default function Settings() {
         });
         if (res.ok) {
           const data = await res.json();
-          setIsGithubConnected(data.isGithubConnected);
+          // Rely on listAccounts for connection status, but use this for username/public toggle
           if (data.user) {
             setGithubUsername(data.user.username);
             if (typeof data.user.isPublic !== 'undefined') setPublicProfile(data.user.isPublic);
@@ -106,28 +101,22 @@ export default function Settings() {
     );
   };
 
-<<<<<<< HEAD
-  const handleDisconnectGithub = async () => {
-    // In a real implementation this would call an unlink API
-    // For now we'll just simulate it or call the better-auth unlink if available
-    // await authClient.unlinkAccount({ providerId: "github" });
-    toast.success("GitHub disconnected");
-    setIsGithubConnected(false);
+  // Connect GitHub
+  const handleConnectGithub = async () => {
+    try {
+      await authClient.signIn.social({
+        provider: "github",
+        callbackURL: "/settings"
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to initiate GitHub connection");
+    }
   };
 
-  const handleConnectGithub = () => {
-    const state = btoa(JSON.stringify({
-      path: window.location.pathname,
-      scroll: window.scrollY
-    }));
-    // Use the backend URL from env or default
-    const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-    window.location.href = `${baseURL}/api/auth/github/authorize?state=${state}`;
-=======
-  // Replaced disconnect logic with info dialog toggle
+  // Disconnect GitHub (Show Info)
   const handleDisconnectClick = () => {
     setShowDisconnectInfo(true);
->>>>>>> 85b1a333534500275d58feb89e85a9052e518ab2
   };
 
   const handleDeleteAccount = () => {
@@ -148,48 +137,43 @@ export default function Settings() {
           <p className="text-muted-foreground mt-1">Manage your preferences</p>
         </section>
 
-<<<<<<< HEAD
-        {/* Account Section */}
-        <Section title="Account" className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
-          <div className="space-y-1 rounded-xl border border-border overflow-hidden">
-            {/* GitHub Connection */}
-            <div className="flex items-center justify-between p-4 bg-secondary/30 hover:bg-secondary/50 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                  <Github className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium">{isGithubConnected ? "GitHub Connected" : "Connect GitHub"}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {isGithubConnected ? `@${session?.user?.name || 'user'}` : "Sync your contributions"}
-                  </p>
-                </div>
-              </div>
-              {isGithubConnected ? (
-                <button
-                  onClick={handleDisconnectGithub}
-                  className="text-sm text-destructive hover:underline"
-                >
-                  Disconnect
-                </button>
-              ) : (
-                <button
-                  onClick={handleConnectGithub}
-                  className="text-sm text-primary hover:underline font-medium"
-                >
-                  Connect
-                </button>
-              )}
-            </div>
-=======
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
->>>>>>> 85b1a333534500275d58feb89e85a9052e518ab2
 
           {/* Left Column */}
           <div className="space-y-6">
             {/* Account Section */}
             <Section title="Account" className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
               <div className="space-y-1 rounded-xl border border-border overflow-hidden">
+
+                {/* GitHub Connection */}
+                <div className="flex items-center justify-between p-4 bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                      <Github className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{isGithubConnected ? "GitHub Connected" : "Connect GitHub"}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {isGithubConnected ? `@${session?.user?.name || 'user'}` : "Sync your contributions"}
+                      </p>
+                    </div>
+                  </div>
+                  {isGithubConnected ? (
+                    <button
+                      onClick={handleDisconnectClick}
+                      className="text-sm text-destructive hover:underline"
+                    >
+                      Disconnect
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleConnectGithub}
+                      className="text-sm text-primary hover:underline font-medium"
+                    >
+                      Connect
+                    </button>
+                  )}
+                </div>
 
                 {/* Refresh Data */}
                 <button
@@ -401,7 +385,7 @@ export default function Settings() {
               </div>
             </Section>
 
-            {/* Danger Zone - Moved here for flow, or could be full width below */}
+            {/* Danger Zone */}
             <Section title="Danger Zone" className="animate-fade-up" style={{ animationDelay: "0.3s" }}>
               <div className="space-y-3">
                 {isGithubConnected && (
