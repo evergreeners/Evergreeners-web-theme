@@ -35,7 +35,8 @@ export default function Settings() {
       try {
         const accounts = await authClient.listAccounts();
         if (accounts.data) {
-          const hasGithub = accounts.data.some((acc: { provider: string }) => acc.provider === "github");
+          // Fix provider check for TypeScript
+          const hasGithub = accounts.data.some((acc) => acc.providerId === "github");
           setIsGithubConnected(hasGithub);
         }
       } catch (error) {
@@ -106,7 +107,7 @@ export default function Settings() {
     try {
       await authClient.signIn.social({
         provider: "github",
-        callbackURL: "/settings"
+        callbackURL: `${window.location.origin}/settings`
       });
     } catch (err) {
       console.error(err);

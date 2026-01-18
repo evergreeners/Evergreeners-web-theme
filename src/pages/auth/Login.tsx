@@ -45,7 +45,7 @@ export default function Login() {
         try {
             await signIn.social({
                 provider: "github",
-                callbackURL: "/dashboard"
+                callbackURL: `${window.location.origin}/dashboard`
             });
         } catch (err) {
             console.error(err);
