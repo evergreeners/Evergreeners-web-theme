@@ -25,7 +25,23 @@ const activityData = Array.from({ length: 84 }, () =>
   Math.random() > 0.3 ? Math.floor(Math.random() * 5) : 0
 );
 
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 export default function Index() {
+  useEffect(() => {
+    if (localStorage.getItem("login_success") === "true") {
+      toast.success("Welcome back!", {
+        description: "Let's keep that streak alive.",
+      });
+      localStorage.removeItem("login_success");
+    } else if (localStorage.getItem("signup_success") === "true") {
+      toast.success("Welcome to Evergreeners!", {
+        description: "Your journey starts now.",
+      });
+      localStorage.removeItem("signup_success");
+    }
+  }, []);
   return (
     <div className="min-h-screen bg-background">
       <Header />

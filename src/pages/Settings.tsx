@@ -321,7 +321,7 @@ export default function Settings() {
             <button
               onClick={async () => {
                 await signOut();
-                toast.success("Logged out successfully");
+                localStorage.setItem("logout_success", "true");
                 window.location.href = "/"; // Force a reload/redirect to clear state
               }}
               className="w-full flex items-center gap-3 p-4 rounded-xl border border-border bg-secondary/30 hover:bg-secondary/50 transition-colors text-left"
