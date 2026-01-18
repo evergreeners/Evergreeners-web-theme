@@ -83,24 +83,70 @@ server.register(async (instance) => {
             const octokit = new Octokit({ auth: token.access_token });
             const { data: githubUser } = await octokit.rest.users.getAuthenticated();
 
+            // Get user emails to find primary email
+            const { data: emails } = await octokit.rest.users.listEmailsForAuthenticatedUser();
+            const primaryEmail = emails.find(e => e.primary)?.email || emails[0]?.email;
+
+            if (!primaryEmail) {
+                reply.redirect('https://evergreeners.vercel.app/login?error=github_no_email');
+                return;
+            }
+
             // Get current session
-            // We need to parse cookies manually or rely on better-auth's handling. 
-            // Since we are in a fastify route, let's use auth.api.getSession
-            // better-auth reads cookies from headers.
             const session = await auth.api.getSession({
                 headers: request.headers
             });
 
-            if (!session) {
-                // If not logged in, we can't link. 
-                // For this use case, we assume they initiated from settings page while logged in.
-                // Alternatively we could create a new user (login via github), but req says "linked to current user"
-                reply.redirect('https://evergreeners.vercel.app/login?error=not_authenticated'); // Fallback to login
+            // Restore state to find redirect target
+            const state = (request.query as any).state;
+            let targetPath = '/dashboard';
+            if (state) {
+                try {
+                    const decoded = JSON.parse(Buffer.from(state, 'base64').toString());
+                    if (decoded.path) targetPath = decoded.path;
+                    if (decoded.scroll) targetPath += `${targetPath.includes('?') ? '&' : '?'}scroll=${decoded.scroll}`;
+                } catch (e) {
+                    // ignore
+                }
+            }
+
+            // SCENARIO 1: User is already logged in (Connect from Settings)
+            if (session) {
+                const existingAccount = await db.query.accounts.findFirst({
+                    where: and(
+                        eq(schema.accounts.providerId, 'github'),
+                        eq(schema.accounts.accountId, githubUser.id.toString())
+                    )
+                });
+
+                if (existingAccount) {
+                    if (existingAccount.userId !== session.user.id) {
+                        reply.redirect(`https://evergreeners.vercel.app/settings?error=github_account_already_linked`);
+                        return;
+                    }
+                    // Update token
+                    await db.update(schema.accounts)
+                        .set({ accessToken: token.access_token, updatedAt: new Date() })
+                        .where(eq(schema.accounts.id, existingAccount.id));
+                } else {
+                    // Create link
+                    await db.insert(schema.accounts).values({
+                        id: crypto.randomUUID(),
+                        userId: session.user.id,
+                        accountId: githubUser.id.toString(),
+                        providerId: 'github',
+                        accessToken: token.access_token,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    });
+                }
+                reply.redirect(`https://evergreeners.vercel.app${targetPath}`);
                 return;
             }
 
-            // Upsert account
-            // Check if account exists
+            // SCENARIO 2: User is NOT logged in (Login/Signup)
+
+            // 1. Check if GitHub account is already linked
             const existingAccount = await db.query.accounts.findFirst({
                 where: and(
                     eq(schema.accounts.providerId, 'github'),
@@ -108,57 +154,92 @@ server.register(async (instance) => {
                 )
             });
 
+            let userId = "";
+
             if (existingAccount) {
-                if (existingAccount.userId !== session.user.id) {
-                    // Account already linked to another user
-                    // Handle error or steal logic? Let's just error for safety
-                    reply.redirect('https://evergreeners.vercel.app/settings?error=github_account_already_linked');
-                    return;
-                }
-                // Update token
+                // Account exists, log them in
+                userId = existingAccount.userId;
+                // Update access token
                 await db.update(schema.accounts)
                     .set({ accessToken: token.access_token, updatedAt: new Date() })
                     .where(eq(schema.accounts.id, existingAccount.id));
             } else {
-                // Create link
-                await db.insert(schema.accounts).values({
-                    id: crypto.randomUUID(),
-                    userId: session.user.id,
-                    accountId: githubUser.id.toString(),
-                    providerId: 'github',
-                    accessToken: token.access_token,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
+                // Account doesn't exist. Check if user with same email exists
+                const existingUser = await db.query.users.findFirst({
+                    where: eq(schema.users.email, primaryEmail)
                 });
-            }
 
-            // Restore state
-            const state = (request.query as any).state;
-            let targetPath = '/';
-            // let scrollPosition = 0; // If we want to pass it back via cookie or query param
+                if (existingUser) {
+                    // Link existing user to GitHub
+                    userId = existingUser.id;
+                    await db.insert(schema.accounts).values({
+                        id: crypto.randomUUID(),
+                        userId: existingUser.id,
+                        accountId: githubUser.id.toString(),
+                        providerId: 'github',
+                        accessToken: token.access_token,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    });
+                } else {
+                    // Create NEW user
+                    userId = crypto.randomUUID();
+                    await db.insert(schema.users).values({
+                        id: userId,
+                        name: githubUser.name || githubUser.login,
+                        email: primaryEmail,
+                        emailVerified: true,
+                        image: githubUser.avatar_url,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    });
 
-            if (state) {
-                try {
-                    const decoded = JSON.parse(Buffer.from(state, 'base64').toString());
-                    if (decoded.path) targetPath = decoded.path;
-                    // Provide scroll position via query param so frontend can handle it
-                    // Or just redirect and let frontend handle it if we passed it in state
-                    // The requirement says "redirect exactly back... and scroll position"
-                    // If we redirect to /settings, the frontend needs to know to scroll. 
-                    // We can append ?scroll=...
-                    if (decoded.scroll) {
-                        targetPath += `${targetPath.includes('?') ? '&' : '?'}scroll=${decoded.scroll}`;
-                    }
-                } catch (e) {
-                    // ignore invalid state
+                    // Create account link
+                    await db.insert(schema.accounts).values({
+                        id: crypto.randomUUID(),
+                        userId: userId,
+                        accountId: githubUser.id.toString(),
+                        providerId: 'github',
+                        accessToken: token.access_token,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    });
                 }
             }
+
+            // Create Session manually since we are outside of better-auth normal flow
+            const sessionToken = crypto.randomUUID();
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + 30); // 30 days
+
+            await db.insert(schema.sessions).values({
+                id: crypto.randomUUID(),
+                userId: userId,
+                token: sessionToken,
+                expiresAt: expiresAt,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                userAgent: request.headers['user-agent'],
+                ipAddress: request.ip
+            });
+
+            // Set cookie
+            const isSecure = process.env.NODE_ENV === 'production' || process.env.BETTER_AUTH_URL?.startsWith('https');
+            const cookieName = isSecure ? "__Secure-better-auth.session_token" : "better-auth.session_token";
+
+            reply.setCookie(cookieName, sessionToken, {
+                path: '/',
+                httpOnly: true,
+                secure: isSecure,
+                sameSite: 'none',
+                expires: expiresAt
+            });
 
             reply.redirect(`https://evergreeners.vercel.app${targetPath}`);
 
         } catch (err) {
             console.error(err);
-            reply.redirect('https://evergreeners.vercel.app/settings?error=github_callback_failed');
+            reply.redirect('https://evergreeners.vercel.app/login?error=github_callback_failed');
         }
     });
 

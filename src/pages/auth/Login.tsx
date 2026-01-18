@@ -40,11 +40,9 @@ export default function Login() {
         });
     };
 
-    const handleGithubLogin = async () => {
-        await signIn.social({
-            provider: "github",
-            callbackURL: `${window.location.origin}/dashboard`
-        });
+    const handleGithubLogin = () => {
+        const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+        window.location.href = `${baseURL}/api/auth/github/authorize?state=${btoa(JSON.stringify({ path: "/dashboard" }))}`;
     };
 
     return (
