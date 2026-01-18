@@ -1,9 +1,21 @@
-import { Settings, Bell, Menu, Home, BarChart3, Flame, Target, Trophy } from "lucide-react";
+import { Settings, Bell, Menu, Home, BarChart3, Flame, Target, Trophy, LogOut } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Logo } from "@/components/Logo";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn, triggerHaptic } from "@/lib/utils";
+import { signOut } from "@/lib/auth-client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const navItems = [
   { icon: Home, label: "Home", href: "/dashboard" },
@@ -72,10 +84,15 @@ export function Header() {
 
             {/* Settings - desktop */}
             <button
-              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200 hidden sm:flex"
+              className={cn(
+                "p-2 rounded-lg transition-all duration-200 hidden sm:flex",
+                currentPath === "/settings"
+                  ? "text-primary bg-secondary/50"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              )}
               onClick={() => navigate('/settings')}
             >
-              <Settings className="w-4 h-4" />
+              <Settings className={cn("w-4 h-4", currentPath === "/settings" && "stroke-[2.5px]")} />
             </button>
 
             {/* Profile Avatar */}
@@ -90,6 +107,38 @@ export function Header() {
                 className="w-full h-full object-cover"
               />
             </Link>
+
+            {/* Logout - desktop */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button
+                  className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200 hidden sm:flex"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="bg-background border-border">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    You will be redirected to the landing page.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={async () => {
+                      await signOut();
+                      localStorage.setItem("logout_success", "true");
+                      window.location.href = "/";
+                    }}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Log Out
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
           </div>
         </div>

@@ -2,13 +2,16 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, Github, GitBranch } from "lucide-react";
 import logo from "@/assets/logo.png";
-
+import authBg from "@/assets/auth-bg.png";
 import { useState } from "react";
-import { signUp } from "@/lib/auth-client";
+import { signUp, signIn } from "@/lib/auth-client";
+import { Loader } from "@/components/ui/loader";
+import { Logo } from "@/components/Logo";
+import { Terminal } from "@/components/auth/Terminal";
+import "@/pages/auth/auth-animations.css";
 
 export default function Signup() {
     const navigate = useNavigate();
@@ -29,7 +32,9 @@ export default function Signup() {
             name: `${firstName} ${lastName}`.trim(),
         }, {
             onSuccess: () => {
-                navigate("/dashboard");
+                // navigate("/dashboard");
+                localStorage.setItem("signup_success", "true");
+                window.location.href = "/dashboard";
             },
             onError: (ctx) => {
                 setError(ctx.error.message);
@@ -38,102 +43,161 @@ export default function Signup() {
         });
     };
 
+    const handleGithubLogin = async () => {
+        await signIn.social({
+            provider: "github",
+            callbackURL: "/dashboard"
+        });
+    };
+
     return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
-            {/* Background Gradients */}
-            <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-emerald-500/20 rounded-full blur-[120px] pointer-events-none opacity-50" />
-            <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] pointer-events-none opacity-50" />
+        <div className="min-h-screen grid lg:grid-cols-2">
+            {/* Loading Overlay */}
+            {loading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                    <Loader />
+                </div>
+            )}
 
-            <Link
-                to="/"
-                className="absolute top-8 left-8 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-                <ArrowLeft className="w-4 h-4" /> Back to Home
-            </Link>
+            {/* Left: Form Section */}
+            <div className="relative flex flex-col justify-center px-4 sm:px-12 lg:px-20 xl:px-32 bg-background order-1">
+                <Link
+                    to="/"
+                    className="absolute top-8 left-8 lg:left-12 z-50 flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground bg-background/50 hover:bg-secondary/50 hover:text-foreground backdrop-blur-md border border-border/50 rounded-full transition-all duration-300 group"
+                >
+                    <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                    Back to Home
+                </Link>
 
-            <Card className="w-full max-w-md border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl relative z-10">
-                <CardHeader className="space-y-4 text-center">
-                    <div className="flex justify-center mb-2">
-                        <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20">
-                            <img src={logo} alt="Logo" className="w-8 h-8 object-contain" />
+                <div className="w-full max-w-md mx-auto space-y-8 py-20 lg:py-0">
+                    <div className="space-y-2 text-center">
+                        <div className="flex justify-center mb-6">
+                            <Logo className="w-12 h-12" />
                         </div>
+                        <h1 className="text-3xl font-bold tracking-tight">Create an account</h1>
+                        <p className="text-muted-foreground">
+                            Start tracking your consistency and build your legacy.
+                        </p>
                     </div>
-                    <div className="space-y-2">
-                        <CardTitle className="text-2xl font-bold tracking-tight">Start Growing</CardTitle>
-                        <CardDescription>
-                            Create an account to track your consistency
-                        </CardDescription>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSignup} className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+
+                    <div className="grid gap-6">
+                        <form onSubmit={handleSignup} className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="firstName">First name</Label>
+                                    <Input
+                                        id="firstName"
+                                        placeholder="Emeka"
+                                        className="bg-secondary/30 border-border focus:border-primary/50 h-11"
+                                        required
+                                        value={firstName}
+                                        onChange={(e) => setFirstName(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="lastName">Last name</Label>
+                                    <Input
+                                        id="lastName"
+                                        placeholder="Okonkwo"
+                                        className="bg-secondary/30 border-border focus:border-primary/50 h-11"
+                                        required
+                                        value={lastName}
+                                        onChange={(e) => setLastName(e.target.value)}
+                                    />
+                                </div>
+                            </div>
                             <div className="space-y-2">
-                                <Label htmlFor="firstName">First name</Label>
+                                <Label htmlFor="email">Email</Label>
                                 <Input
-                                    id="firstName"
-                                    placeholder="John"
-                                    className="bg-white/5 border-white/10 focus:border-primary/50"
+                                    id="email"
+                                    type="email"
+                                    placeholder="emeka@example.com"
+                                    className="bg-secondary/30 border-border focus:border-primary/50 h-11"
                                     required
-                                    value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="lastName">Last name</Label>
+                                <Label htmlFor="password">Password</Label>
                                 <Input
-                                    id="lastName"
-                                    placeholder="Doe"
-                                    className="bg-white/5 border-white/10 focus:border-primary/50"
+                                    id="password"
+                                    type="password"
+                                    className="bg-secondary/30 border-border focus:border-primary/50 h-11"
                                     required
-                                    value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                 />
+                                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Check className="w-3 h-3 text-primary" /> Must be at least 8 characters
+                                </div>
                             </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                placeholder="hello@example.com"
-                                className="bg-white/5 border-white/10 focus:border-primary/50"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                className="bg-white/5 border-white/10 focus:border-primary/50"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                            <div className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Check className="w-3 h-3 text-primary" /> Must be at least 8 characters
+
+                            {error && <p className="text-destructive text-sm font-medium">{error}</p>}
+
+                            <Button type="submit" className="w-full h-11 bg-primary text-primary-foreground font-medium hover:bg-primary/90" disabled={loading}>
+                                {loading ? "Creating Account..." : "Create Account"}
+                            </Button>
+                        </form>
+
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t border-border" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-background px-2 text-muted-foreground">
+                                    Or continue with
+                                </span>
                             </div>
                         </div>
 
-                        {error && <p className="text-red-500 text-sm">{error}</p>}
-
-                        <Button type="submit" className="w-full bg-primary text-black font-medium hover:bg-primary/90 mt-2" disabled={loading}>
-                            {loading ? "Creating Account..." : "Create Account"}
+                        <Button
+                            variant="outline"
+                            className="w-full h-11 border-border hover:bg-secondary/50 flex items-center gap-2"
+                            onClick={handleGithubLogin}
+                            type="button"
+                        >
+                            <Github className="w-4 h-4" />
+                            GitHub
                         </Button>
-                    </form>
-                </CardContent>
-                <CardFooter className="flex justify-center border-t border-white/5 pt-6">
-                    <p className="text-sm text-muted-foreground">
+                    </div>
+
+                    <p className="px-8 text-center text-sm text-muted-foreground">
                         Already have an account?{" "}
                         <Link to="/login" className="text-primary font-semibold hover:underline">
                             Sign in
                         </Link>
                     </p>
-                </CardFooter>
-            </Card>
+                </div>
+            </div>
+
+            {/* Right: Decorative Section */}
+            <div
+                className="hidden lg:flex flex-col justify-between bg-black border-l border-zinc-900 p-12 text-white relative overflow-hidden order-2"
+                style={{ backgroundImage: `url(${authBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+            >
+                {/* Terminal Animation */}
+                <div className="absolute inset-0 z-10 flex items-start justify-center p-4 lg:p-12 pt-20 lg:pt-32">
+                    <Terminal />
+                </div>
+
+                {/* Gradient Overlay */}
+                <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-0 pointer-events-none" />
+
+                <div className="relative z-20 mt-auto">
+                    <div className="w-12 h-12 bg-white/5 backdrop-blur-md rounded-xl flex items-center justify-center mb-6 border border-white/10 shadow-xl">
+                        <GitBranch className="w-6 h-6 text-green-400" />
+                    </div>
+                    <blockquote className="space-y-2">
+                        <p className="text-lg font-medium leading-relaxed tracking-wide text-zinc-100">
+                            "Success is the sum of small efforts, repeated day in and day out. Start your legacy with a single commit."
+                        </p>
+                        <footer className="text-sm font-medium text-green-400/80">
+                            Ibrahim Isa, Data Scientist
+                        </footer>
+                    </blockquote>
+                </div>
+            </div>
         </div>
     );
 }

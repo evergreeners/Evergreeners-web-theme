@@ -1,5 +1,6 @@
 
 import { PublicHeader } from "@/components/PublicHeader";
+import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import {
     ArrowRight,
@@ -24,6 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
+import { useSession } from "@/lib/auth-client";
 import dashboardMockup from "@/assets/dashboard-mockup.png";
 import zenModeGraphic from "@/assets/zen-mode-graphic.png";
 import { ScrewToggle } from "@/components/ui/screw-toggle";
@@ -37,6 +39,20 @@ export default function Landing() {
     const [loopNum, setLoopNum] = useState(0);
     const [typingSpeed, setTypingSpeed] = useState(150);
     const navigate = useNavigate();
+    const { data: session } = useSession();
+
+    useEffect(() => {
+        if (session) {
+            navigate("/dashboard");
+        }
+
+        if (localStorage.getItem("logout_success") === "true") {
+            toast.success("Logged out successfully", {
+                description: "See you next time!",
+            });
+            localStorage.removeItem("logout_success");
+        }
+    }, [session, navigate]);
 
     const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {

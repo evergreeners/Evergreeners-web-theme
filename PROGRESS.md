@@ -32,7 +32,7 @@
 ## 🚧 In Progress / Next Steps
 
 ### Backend API (Fastify)
-- [ ] **Create Resource Routes**: Implement REST endpoints for projects, gallery, stories.
+- [ ] **Create Resource Routes**: Implement REST endpoints.
 - [x] **Middleware**: Implement route protection using Better Auth.
 
 ### Frontend Integration
