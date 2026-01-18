@@ -3,7 +3,7 @@ import cors from '@fastify/cors';
 import * as dotenv from 'dotenv';
 import { auth } from './auth.js';
 import { toNodeHandler } from 'better-auth/node';
-import oauthPlugin from '@fastify/oauth2';
+// import oauthPlugin from '@fastify/oauth2';
 import { Octokit } from 'octokit';
 
 import { db } from './db/index.js';
@@ -32,25 +32,7 @@ server.register(cors, {
     allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
 });
 
-// Register GitHub OAuth
-server.register(oauthPlugin, {
-    name: 'github',
-    credentials: {
-        client: {
-            id: process.env.GITHUB_CLIENT_ID || '',
-            secret: process.env.GITHUB_CLIENT_SECRET || ''
-        },
-        auth: {
-            authorizeHost: 'https://github.com',
-            authorizePath: '/login/oauth/authorize',
-            tokenHost: 'https://github.com',
-            tokenPath: '/login/oauth/access_token'
-        }
-    },
-    startRedirectPath: '/api/auth/github/authorize',
-    callbackUri: `${process.env.BETTER_AUTH_URL || 'http://localhost:3000'}/api/auth/github/callback`,
-    scope: ['read:user', 'user:email']
-});
+// GitHub OAuth is handled by better-auth in separate adapter
 
 // Auth Routes
 server.register(async (instance) => {

@@ -43,9 +43,17 @@ export default function Signup() {
         });
     };
 
-    const handleGithubLogin = () => {
-        const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-        window.location.href = `${baseURL}/api/auth/github/authorize?state=${btoa(JSON.stringify({ path: "/dashboard" }))}`;
+    const handleGithubLogin = async () => {
+        setLoading(true);
+        try {
+            await signIn.social({
+                provider: "github",
+                callbackURL: "/dashboard"
+            });
+        } catch (err) {
+            console.error(err);
+            setLoading(false);
+        }
     };
 
     return (
