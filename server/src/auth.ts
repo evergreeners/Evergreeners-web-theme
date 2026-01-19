@@ -46,6 +46,7 @@ export const auth = betterAuth({
             anonymousName: { type: "string" },
             streak: { type: "number" },
             totalCommits: { type: "number" },
+            todayCommits: { type: "number" }, // Field for daily stats
             isGithubConnected: { type: "boolean" }
         }
     },
