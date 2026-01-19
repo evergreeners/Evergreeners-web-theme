@@ -18,9 +18,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-const activityData = Array.from({ length: 84 }, () =>
-  Math.random() > 0.3 ? Math.floor(Math.random() * 5) : 0
-);
+
 
 const achievements = [
   { name: "Early Adopter", icon: "🌱", earned: true },
@@ -74,8 +72,10 @@ export default function Profile() {
   useEffect(() => {
     const initProfile = async () => {
       if (session?.user) {
-        // Initial hydrate from session (fast)
+        // Initial hydrate from session (fast but potentially stale)
         const user = session.user as any;
+
+        // Optimistically set from session first to show SOMETHING immediately
         setProfile(prev => ({
           ...prev,
           name: user.name || "Tree Planter",
@@ -93,20 +93,39 @@ export default function Profile() {
         }));
         setIsPublic(user.isPublic !== false);
 
-        // Ensure strictly no nulls for controlled inputs to avoid React warnings
-        const sanitizedUser = { ...user };
-        // Fallback for fields that might be null in DB but need to be empty string for inputs
-        if (!sanitizedUser.bio) sanitizedUser.bio = "";
-        if (!sanitizedUser.location) sanitizedUser.location = "";
-        if (!sanitizedUser.website) sanitizedUser.website = "";
-        if (!sanitizedUser.image) sanitizedUser.image = "";
-
-        setEditedProfile(prev => ({ ...prev, ...sanitizedUser }));
+        // Fetch FRESH data only (no profile overwrite if not needed, but here we want fresh stats AND fresh profile info if it changed)
+        // Actually, the issue was user edits disappearing.
+        // We fetching /api/user/profile ensures we display what is in the DB, not what is in the stale session cookie.
+        try {
+          const baseUrl = getBaseURL(import.meta.env.VITE_API_URL || 'http://localhost:3000');
+          const res = await fetch(`${baseUrl}/api/user/profile`, { credentials: "include" });
+          if (res.ok) {
+            const { user: freshUser } = await res.json();
+            setProfile(prev => ({
+              ...prev,
+              name: freshUser.name || prev.name,
+              username: freshUser.username || prev.username,
+              bio: freshUser.bio || prev.bio,
+              location: freshUser.location || prev.location,
+              website: freshUser.website || prev.website,
+              image: freshUser.image || prev.image,
+              anonymousName: freshUser.anonymousName || prev.anonymousName,
+              streak: freshUser.streak,
+              totalCommits: freshUser.totalCommits,
+              todayCommits: freshUser.todayCommits,
+              contributionData: freshUser.contributionData || prev.contributionData
+            }));
+            // Also update the edit form state so it doesn't revert if they open it
+            setEditedProfile(prev => ({ ...prev, ...freshUser }));
+            setIsPublic(freshUser.isPublic !== false);
+          }
+        } catch (e) {
+          console.error("Failed to fetch fresh profile", e);
+        }
 
         if (typeof user.isGithubConnected === 'boolean') {
           setIsGithubConnected(user.isGithubConnected);
         } else {
-          // Fallback for older sessions or if field missing
           try {
             const accounts = await authClient.listAccounts();
             if (accounts.data) {
@@ -393,24 +412,8 @@ export default function Profile() {
 
         {/* Activity Grid */}
         <Section title="Recent Activity" className="animate-fade-up" style={{ animationDelay: "0.25s" }}>
-          <ActivityGrid data={profile.contributionData && profile.contributionData.length > 0 ? [...profile.contributionData].reverse() : activityData} />
-          <div className="flex items-center justify-end gap-2 mt-3">
-            <span className="text-xs text-muted-foreground">Less</span>
-            <div className="flex gap-1">
-              {[0, 1, 2, 3, 4].map((level) => (
-                <div
-                  key={level}
-                  className={`w-3 h-3 rounded-sm ${level === 0 ? "bg-secondary" :
-                    level === 1 ? "bg-primary/25" :
-                      level === 2 ? "bg-primary/50" :
-                        level === 3 ? "bg-primary/75" :
-                          "bg-primary"
-                    }`}
-                />
-              ))}
-            </div>
-            <span className="text-xs text-muted-foreground">More</span>
-          </div>
+          <ActivityGrid data={profile.contributionData} />
+
         </Section>
 
         {/* Achievements */}
