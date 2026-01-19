@@ -5,7 +5,7 @@ import cors from '@fastify/cors';
 import { auth } from './auth.js';
 import { toNodeHandler } from 'better-auth/node';
 // import oauthPlugin from '@fastify/oauth2';
-import { Octokit } from 'octokit';
+
 
 import { db } from './db/index.js';
 import * as schema from './db/schema.js';
@@ -140,8 +140,17 @@ server.register(async (instance) => {
 
     // Custom route to force-sync GitHub data
     instance.post('/api/user/sync-github', async (req, reply) => {
+        const headers = new Headers();
+        Object.entries(req.headers).forEach(([key, value]) => {
+            if (Array.isArray(value)) {
+                value.forEach(v => headers.append(key, v));
+            } else if (typeof value === 'string') {
+                headers.set(key, value);
+            }
+        });
+
         const session = await auth.api.getSession({
-            headers: req.headers
+            headers
         });
 
         if (!session) {

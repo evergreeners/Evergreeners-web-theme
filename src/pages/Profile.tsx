@@ -5,7 +5,7 @@ import { ActivityGrid } from "@/components/ActivityGrid";
 import {
   Github, MapPin, Calendar, Link as LinkIcon,
   Edit2, Share2, Check, Copy, Trophy, Flame, Target, GitCommit,
-  Eye, EyeOff, ExternalLink
+  Eye, EyeOff, ExternalLink, RefreshCw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -100,6 +100,38 @@ export default function Profile() {
     };
     initProfile();
   }, [session]);
+
+  const syncGithubData = async () => {
+    try {
+      toast.info("Syncing GitHub data...");
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/user/sync-github`, {
+        method: "POST",
+        credentials: "include"
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setProfile(prev => ({
+          ...prev,
+          username: data.username || prev.username,
+          streak: data.streak,
+          totalCommits: data.totalCommits
+        }));
+        toast.success("GitHub data synced!");
+      } else {
+        console.error("Sync failed with status:", res.status);
+      }
+    } catch (e) {
+      console.error("Sync failed", e);
+    }
+  };
+
+  // Auto-sync effect
+  useEffect(() => {
+    if (isGithubConnected && profile.streak === 0 && profile.totalCommits === 0) {
+      syncGithubData();
+    }
+  }, [isGithubConnected]);
 
   const publicUrl = `evergreeners.dev/${isPublic ? profile.username : profile.anonymousName || 'anonymous'}`;
 
@@ -334,11 +366,24 @@ export default function Profile() {
             {stats.map((stat) => (
               <div
                 key={stat.label}
-                className="p-4 rounded-xl border border-border bg-secondary/30 text-center hover:bg-secondary/50 transition-all duration-300"
+                className="p-4 rounded-xl border border-border bg-secondary/30 text-center hover:bg-secondary/50 transition-all duration-300 relative group"
               >
                 <stat.icon className="w-5 h-5 text-primary mx-auto mb-2" />
                 <p className="text-2xl font-bold">{stat.value}</p>
                 <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+
+                {stat.label === "Total Commits" && isGithubConnected && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      syncGithubData();
+                    }}
+                    className="absolute top-2 right-2 p-1 rounded-full hover:bg-background/50 opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Refresh Data"
+                  >
+                    <RefreshCw className="w-3 h-3 text-muted-foreground" />
+                  </button>
+                )}
               </div>
             ))}
           </div>
