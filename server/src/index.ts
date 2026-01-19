@@ -1,4 +1,4 @@
-import './env.js';
+import './env.js'; // Trigger restart
 import fastify from 'fastify';
 import cors from '@fastify/cors';
 // dotenv is loaded first via ./env.js
@@ -82,6 +82,10 @@ async function getGithubContributions(username: string, token: string) {
     // Check if user has contributed today or yesterday to start the streak count
     let startIndex = allDays.findIndex((d: any) => d.contributionCount > 0);
 
+    // Calculate Today's Commits
+    const todayData = allDays.find((d: any) => d.date === todayStr);
+    const todayCommits = todayData ? todayData.contributionCount : 0;
+
     if (startIndex !== -1) {
         const lastContribDate = allDays[startIndex].date;
         // If the last contribution was more than 1 day ago, the current streak is 0
@@ -99,7 +103,7 @@ async function getGithubContributions(username: string, token: string) {
         }
     }
 
-    return { totalCommits, currentStreak };
+    return { totalCommits, currentStreak, todayCommits };
 }
 
 // Auth Routes Scope (No Body Parsing for better-auth)
@@ -178,7 +182,7 @@ server.register(async (instance) => {
             const ghUser = await ghRes.json();
 
             // 3. Fetch Contributions (Streak & Total Commits)
-            const { totalCommits, currentStreak } = await getGithubContributions(ghUser.login, account[0].accessToken);
+            const { totalCommits, currentStreak, todayCommits } = await getGithubContributions(ghUser.login, account[0].accessToken);
 
             // 4. Update User Profile
             await db.update(schema.users)
@@ -191,12 +195,13 @@ server.register(async (instance) => {
                     website: ghUser.blog,
                     streak: currentStreak,
                     totalCommits: totalCommits,
+                    todayCommits: todayCommits, // Save today's commits
                     isGithubConnected: true,
                     updatedAt: new Date()
                 })
                 .where(eq(schema.users.id, userId));
 
-            return { success: true, username: ghUser.login, streak: currentStreak, totalCommits };
+            return { success: true, username: ghUser.login, streak: currentStreak, totalCommits, todayCommits };
         } catch (error) {
             console.error(error);
             return reply.status(500).send({ message: "Failed to sync with GitHub" });
