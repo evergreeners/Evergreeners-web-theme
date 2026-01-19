@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -84,7 +84,16 @@ export default function Profile() {
           totalCommits: user.totalCommits || 0
         }));
         setIsPublic(user.isPublic !== false);
-        setEditedProfile(prev => ({ ...prev, ...user }));
+
+        // Ensure strictly no nulls for controlled inputs to avoid React warnings
+        const sanitizedUser = { ...user };
+        // Fallback for fields that might be null in DB but need to be empty string for inputs
+        if (!sanitizedUser.bio) sanitizedUser.bio = "";
+        if (!sanitizedUser.location) sanitizedUser.location = "";
+        if (!sanitizedUser.website) sanitizedUser.website = "";
+        if (!sanitizedUser.image) sanitizedUser.image = "";
+
+        setEditedProfile(prev => ({ ...prev, ...sanitizedUser }));
 
         if (typeof user.isGithubConnected === 'boolean') {
           setIsGithubConnected(user.isGithubConnected);
@@ -138,12 +147,11 @@ export default function Profile() {
   };
 
   // Auto-sync effect
-  // Auto-sync effect removed as per user request to rely on DB data
-  // useEffect(() => {
-  //   if (isGithubConnected && profile.streak === 0 && profile.totalCommits === 0) {
-  //     syncGithubData();
-  //   }
-  // }, [isGithubConnected]);
+  useEffect(() => {
+    if (isGithubConnected && profile.streak === 0 && profile.totalCommits === 0) {
+      syncGithubData();
+    }
+  }, [isGithubConnected]);
 
   const publicUrl = `evergreeners.dev/${isPublic ? profile.username : profile.anonymousName || 'anonymous'}`;
 
@@ -262,6 +270,9 @@ export default function Profile() {
                     <DialogContent className="bg-background border-border">
                       <DialogHeader>
                         <DialogTitle>Edit Profile</DialogTitle>
+                        <DialogDescription className="text-muted-foreground">
+                          Make changes to your public profile here. Click save when you're done.
+                        </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4 py-4">
                         <div>
