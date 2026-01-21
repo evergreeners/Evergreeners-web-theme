@@ -3,8 +3,13 @@ export async function getGithubContributions(username: string, token: string) {
     const query = `
         query($username: String!) {
             user(login: $username) {
-                repositoriesContributedTo(first: 100, contributionTypes: [COMMIT, ISSUE, PULL_REQUEST, REPOSITORY]) {
+                repositoriesContributedTo(first: 100, contributionTypes: [COMMIT, ISSUE, PULL_REQUEST, REPOSITORY], orderBy: {field: UPDATED_AT, direction: DESC}) {
                     totalCount
+                    nodes {
+                        nameWithOwner
+                        url
+                        updatedAt
+                    }
                 }
                 contributionsCollection {
                     contributionCalendar {
@@ -81,14 +86,23 @@ export async function getGithubContributions(username: string, token: string) {
     const yesterdayData = allDays.find((d: any) => d.date === yesterdayStr);
     const yesterdayCommits = yesterdayData ? yesterdayData.contributionCount : 0;
 
-    // Calculate Weekly Commits (Last 7 days)
-    const oneWeekAgoDate = new Date();
-    oneWeekAgoDate.setDate(oneWeekAgoDate.getDate() - 6); // 7 days inclusive
-    const oneWeekAgoStr = oneWeekAgoDate.toISOString().split('T')[0];
+    // Calculate Calendar Week Stats (Mon - Sun)
+    const now = new Date();
+    // Monday calculation using UTC to match todayStr (ISO)
+    const dayOfWeek = now.getUTCDay(); // 0 (Sun) - 6 (Sat)
+    const distToMon = (dayOfWeek + 6) % 7; // Mon=0, Tue=1 ... Sun=6
+    const mondayDate = new Date(now);
+    mondayDate.setUTCDate(now.getUTCDate() - distToMon);
+    const mondayStr = mondayDate.toISOString().split('T')[0];
 
-    const weeklyData = allDays.filter((d: any) => d.date >= oneWeekAgoStr && d.date <= todayStr);
-    const weeklyCommits = weeklyData.reduce((acc: number, d: any) => acc + d.contributionCount, 0);
-    const activeDays = weeklyData.filter((d: any) => d.contributionCount > 0).length;
+    // Filter contributions for this calendar week (Mon -> Today)
+    const currentWeekData = allDays.filter((d: any) => d.date >= mondayStr && d.date <= todayStr);
 
-    return { totalCommits, currentStreak, todayCommits, yesterdayCommits, weeklyCommits, activeDays, totalProjects, contributionCalendar: allDays };
+    // Rolling 7-days for reference if needed, but for "Weekly" stats we use Calendar Week
+    const weeklyCommits = currentWeekData.reduce((acc: number, d: any) => acc + d.contributionCount, 0);
+    const activeDays = currentWeekData.filter((d: any) => d.contributionCount > 0).length;
+
+    const projects = user.repositoriesContributedTo.nodes;
+
+    return { totalCommits, currentStreak, todayCommits, yesterdayCommits, weeklyCommits, activeDays, totalProjects, projects, contributionCalendar: allDays };
 }
