@@ -86,11 +86,21 @@ export async function getGithubContributions(username: string, token: string) {
     const yesterdayData = allDays.find((d: any) => d.date === yesterdayStr);
     const yesterdayCommits = yesterdayData ? yesterdayData.contributionCount : 0;
 
-    // Calculate Calendar Week Stats (Mon - Sun)
+    // Calculate ROLLING 7-day window for "Weekly commits" goal (last 7 days including today)
     const now = new Date();
-    // Monday calculation using UTC to match todayStr (ISO)
+    const sevenDaysAgo = new Date(now);
+    sevenDaysAgo.setUTCDate(now.getUTCDate() - 6); // 6 days ago + today = 7 days total
+    const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
+
+    // Filter contributions for the last 7 days (including today)
+    const last7DaysData = allDays.filter((d: any) => d.date >= sevenDaysAgoStr && d.date <= todayStr);
+
+    // Weekly commits = sum of all commits in last 7 days (rolling window)
+    const weeklyCommits = last7DaysData.reduce((acc: number, d: any) => acc + d.contributionCount, 0);
+
+    // Calculate CALENDAR WEEK (Mon-Sun) for "Code X days/week" goal
     const dayOfWeek = now.getUTCDay(); // 0 (Sun) - 6 (Sat)
-    const distToMon = (dayOfWeek + 6) % 7; // Mon=0, Tue=1 ... Sun=6
+    const distToMon = (dayOfWeek + 6) % 7; // Distance to Monday
     const mondayDate = new Date(now);
     mondayDate.setUTCDate(now.getUTCDate() - distToMon);
     const mondayStr = mondayDate.toISOString().split('T')[0];
@@ -98,8 +108,7 @@ export async function getGithubContributions(username: string, token: string) {
     // Filter contributions for this calendar week (Mon -> Today)
     const currentWeekData = allDays.filter((d: any) => d.date >= mondayStr && d.date <= todayStr);
 
-    // Rolling 7-days for reference if needed, but for "Weekly" stats we use Calendar Week
-    const weeklyCommits = currentWeekData.reduce((acc: number, d: any) => acc + d.contributionCount, 0);
+    // Active days = number of days with at least 1 commit in the current calendar week
     const activeDays = currentWeekData.filter((d: any) => d.contributionCount > 0).length;
 
     const projects = user.repositoriesContributedTo.nodes;

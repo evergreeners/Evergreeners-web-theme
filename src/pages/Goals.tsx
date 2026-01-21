@@ -4,7 +4,7 @@ import { Section } from "@/components/Section";
 import { GoalProgress } from "@/components/GoalProgress";
 import {
   Target, Plus, Edit2, Trash2, Check, Calendar,
-  Flame, GitCommit, BookOpen, Trophy, Clock
+  Flame, GitCommit, BookOpen, Trophy, Clock, Info
 } from "lucide-react";
 import { triggerHaptic } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -49,10 +49,10 @@ interface Goal {
 }
 
 const goalTemplates = [
-  { type: "streak", title: "Maintain streak", icon: Flame, defaultTarget: 30 },
-  { type: "commits", title: "Weekly commits", icon: GitCommit, defaultTarget: 20 },
-  { type: "days", title: "Code X days/week", icon: Calendar, defaultTarget: 5 },
-  { type: "projects", title: "Contribute to repos", icon: BookOpen, defaultTarget: 3 },
+  { type: "streak", title: "Maintain streak", icon: Flame, defaultTarget: 30, description: "Track consecutive days of GitHub contributions" },
+  { type: "commits", title: "Weekly commits", icon: GitCommit, defaultTarget: 20, description: "Count commits made in the last 7 days (rolling window)" },
+  { type: "days", title: "Code X days/week", icon: Calendar, defaultTarget: 5, description: "Track active coding days in the current week (Mon-Sun)" },
+  { type: "projects", title: "Contribute to repos", icon: BookOpen, defaultTarget: 3, description: "Number of repositories you've contributed to" },
 ];
 
 const API_URL = import.meta.env.VITE_API_URL || "";
@@ -394,40 +394,70 @@ export default function Goals() {
             {activeGoals.map((goal) => {
               const Icon = goal.icon || Trophy;
               const isProjectsGoal = goal.type === 'projects';
+              const goalTemplate = goalTemplates.find(t => t.type === goal.type);
               return (
                 <div
                   key={goal.id}
                   className={`p-4 rounded-xl border border-border bg-secondary/30 transition-all duration-300 group flex flex-col justify-between ${isProjectsGoal ? 'hover:bg-secondary/50' : 'hover:bg-secondary/50'}`}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
-                        <Icon className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-medium truncate">{goal.title}</p>
-                        {goal.type === 'days' && (() => {
-                          const todayIndex = (new Date().getDay() + 6) % 7; // Mon=0, Sun=6
-                          const startIndex = daysOfWeek.indexOf(goal.dueDate || "Monday");
+                  {/* Header with icon, title, and actions */}
+                  <div className="flex items-start gap-3 mb-3">
+                    {/* Icon */}
+                    <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+                      <Icon className="w-5 h-5 text-primary" />
+                    </div>
 
-                          // How many days of the range have strictly passed before today?
-                          const daysPassedInRangeBeforeToday = Math.max(0, todayIndex - startIndex);
-
-                          // If our current consecutive count is less than the days that should have been hit...
-                          const isBroken = goal.current < daysPassedInRangeBeforeToday;
-
-                          if (isBroken) return <span className="text-xs font-bold text-destructive flex items-center gap-1">Goal Broken</span>;
-                          if (goal.completed) return <span className="text-xs font-bold text-green-500 flex items-center gap-1">Completed!</span>;
-                          return <span className="text-xs text-green-500 flex items-center gap-1">On Track</span>;
-                        })()}
-                        {goal.dueDate && goal.type !== 'days' && (
-                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                            <Clock className="w-3 h-3" /> Due: {goal.dueDate}
-                          </p>
+                    {/* Title and status - flexible to take available space */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start gap-1.5">
+                        <p className="font-medium text-sm leading-tight flex-1">{goal.title}</p>
+                        {goalTemplate?.description && (
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <button
+                                className="shrink-0 p-1 rounded-lg hover:bg-secondary/50 transition-colors"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Info className="w-3.5 h-3.5 text-muted-foreground" />
+                              </button>
+                            </DialogTrigger>
+                            <DialogContent className="bg-background border-border max-w-sm">
+                              <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                  <Icon className="w-5 h-5 text-primary" />
+                                  {goalTemplate.title}
+                                </DialogTitle>
+                                <DialogDescription className="text-left pt-2">
+                                  {goalTemplate.description}
+                                </DialogDescription>
+                              </DialogHeader>
+                            </DialogContent>
+                          </Dialog>
                         )}
                       </div>
+                      {goal.type === 'days' && (() => {
+                        const todayIndex = (new Date().getDay() + 6) % 7; // Mon=0, Sun=6
+                        const startIndex = daysOfWeek.indexOf(goal.dueDate || "Monday");
+
+                        // How many days of the range have strictly passed before today?
+                        const daysPassedInRangeBeforeToday = Math.max(0, todayIndex - startIndex);
+
+                        // If our current consecutive count is less than the days that should have been hit...
+                        const isBroken = goal.current < daysPassedInRangeBeforeToday;
+
+                        if (isBroken) return <span className="text-xs font-bold text-destructive flex items-center gap-1 mt-1">Goal Broken</span>;
+                        if (goal.completed) return <span className="text-xs font-bold text-green-500 flex items-center gap-1 mt-1">Completed!</span>;
+                        return <span className="text-xs text-green-500 flex items-center gap-1 mt-1">On Track</span>;
+                      })()}
+                      {goal.dueDate && goal.type !== 'days' && (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                          <Clock className="w-3 h-3" /> Due: {goal.dueDate}
+                        </p>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+
+                    {/* Action buttons - always stay on the right */}
+                    <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Dialog open={editingGoal?.id === goal.id} onOpenChange={(open) => !open && setEditingGoal(null)}>
                         <DialogTrigger asChild>
                           <button
