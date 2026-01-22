@@ -8,7 +8,7 @@ import Landing from "./pages/Landing";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import Analytics from "./pages/Analytics";
-import Streaks from "./pages/Streaks";
+import Quests from "./pages/Quests";
 import Goals from "./pages/Goals";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
@@ -34,7 +34,7 @@ const App = () => (
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Index />} />
             <Route path="/analytics" element={<Analytics />} />
-            <Route path="/streaks" element={<Streaks />} />
+            <Route path="/quests" element={<Quests />} />
             <Route path="/goals" element={<Goals />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />

@@ -64,6 +64,20 @@
       "when": 1769000932375,
       "tag": "0008_warm_nightshade",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1769078940626,
+      "tag": "0009_nasty_blizzard",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1769079521316,
+      "tag": "0010_friendly_butterfly",
+      "breakpoints": true
     }
   ]
 }

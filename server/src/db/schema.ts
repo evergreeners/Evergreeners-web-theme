@@ -106,3 +106,26 @@ export const goals = mySchema.table('goals', {
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
 });
+
+export const quests = mySchema.table('quests', {
+    id: serial('id').primaryKey(),
+    title: text('title').notNull(),
+    description: text('description').notNull(),
+    repoUrl: text('repo_url').notNull(),
+    tags: jsonb('tags').$type<string[]>(),
+    difficulty: text('difficulty').notNull(),
+    points: integer('points').default(10),
+    createdBy: text('created_by'),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const userQuests = mySchema.table('user_quests', {
+    id: serial('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id),
+    questId: integer('quest_id').notNull().references(() => quests.id),
+    status: text('status').default('active'),
+    startedAt: timestamp('started_at').defaultNow(),
+    completedAt: timestamp('completed_at'),
+    forkUrl: text('fork_url'),
+});

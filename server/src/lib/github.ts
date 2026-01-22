@@ -1,3 +1,4 @@
+import { Octokit } from "octokit";
 
 export async function getGithubContributions(username: string, token: string) {
     const query = `
@@ -115,3 +116,83 @@ export async function getGithubContributions(username: string, token: string) {
 
     return { totalCommits, currentStreak, todayCommits, yesterdayCommits, weeklyCommits, activeDays, totalProjects, projects, contributionCalendar: allDays };
 }
+
+export async function checkQuestProgress(username: string, token: string, questRepoUrl: string) {
+    const octokit = new Octokit({ auth: token });
+
+    // Parse owner/repo from quest URL
+    // Format: https://github.com/owner/repo
+    const parts = questRepoUrl.replace("https://github.com/", "").split("/");
+    if (parts.length < 2) return { status: 'error', message: 'Invalid repo URL' };
+
+    const [originalOwner, repoName] = parts;
+
+    try {
+        // 1. Check if user has a fork (assuming same name for MVP)
+        // We check /repos/{username}/{repoName}
+        // If it exists and is a fork, we proceed.
+
+        const { data: userRepo } = await octokit.rest.repos.get({
+            owner: username,
+            repo: repoName
+        });
+
+        if (!userRepo.fork) {
+            return { status: 'not_started', message: 'Repo found but not a fork' };
+        }
+
+        // 2. Check for recent activity (commits)
+        // We want to know if they contributed. 
+        // Simple check: get commits by author
+        const { data: commits } = await octokit.rest.repos.listCommits({
+            owner: username,
+            repo: repoName,
+            author: username,
+            since: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() // Last 7 days
+        });
+
+        if (commits.length > 0) {
+            return { status: 'completed', commits: commits.length, forkUrl: userRepo.html_url };
+        }
+
+        // 3. Alternatively, check PRs to upstream
+        const { data: prs } = await octokit.rest.pulls.list({
+            owner: originalOwner,
+            repo: repoName,
+            head: `${username}:${userRepo.default_branch}`, // Assuming PR from default branch
+            state: 'all'
+        });
+
+        // Also check simplified "any PR from this user"
+        const { data: userPrs } = await octokit.request('GET /repos/{owner}/{repo}/pulls', {
+            owner: originalOwner,
+            repo: repoName,
+            head: `${username}`, // Filter by user prefix if possible, but 'head' param expects user:ref
+        });
+        // The above might fail or be inexact. 
+        // Let's stick to listing PRs and filtering by user.login
+
+        const { data: allPrs } = await octokit.rest.pulls.list({
+            owner: originalOwner,
+            repo: repoName,
+            state: 'all',
+            per_page: 100
+        });
+
+        const myPr = allPrs.find(pr => pr.user?.login === username);
+
+        if (myPr) {
+            return { status: 'completed', prUrl: myPr.html_url, forkUrl: userRepo.html_url };
+        }
+
+        return { status: 'in_progress', forkUrl: userRepo.html_url };
+
+    } catch (error: any) {
+        if (error.status === 404) {
+            return { status: 'not_started', message: 'Fork not found' };
+        }
+        console.error("Error checking quest progress:", error);
+        return { status: 'error', message: error.message };
+    }
+}
+
