@@ -16,6 +16,7 @@ import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { ThemeProvider } from "./components/theme-provider";
 
 const queryClient = new QueryClient();
 
@@ -49,3 +50,7 @@ const App = () => (
 );
 
 export default App;
+// src/App.tsx
+<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme" attribute="class" children={""}>
+  {/* ... */}
+</ThemeProvider>

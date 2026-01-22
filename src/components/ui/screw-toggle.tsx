@@ -1,4 +1,4 @@
-import React from 'react';
+ import React from 'react';
 import './screw-toggle.css';
 
 interface ScrewToggleProps extends React.InputHTMLAttributes<HTMLInputElement> { }
@@ -278,29 +278,18 @@ export const ScrewToggle: React.FC<ScrewToggleProps> = (props) => {
 
                                 <span className="st-content">
                                     <span className="st-text st-state-1">
-                                        <span data-label="G" style={{ "--i": 1 } as React.CSSProperties}>G</span>
-                                        <span data-label="e" style={{ "--i": 2 } as React.CSSProperties}>e</span>
-                                        <span data-label="t" style={{ "--i": 3 } as React.CSSProperties}>t</span>
-                                        <span data-label="&nbsp;" style={{ "--i": 4 } as React.CSSProperties}>&nbsp;</span>
-                                        <span data-label="S" style={{ "--i": 5 } as React.CSSProperties}>S</span>
-                                        <span data-label="t" style={{ "--i": 6 } as React.CSSProperties}>t</span>
-                                        <span data-label="a" style={{ "--i": 7 } as React.CSSProperties}>a</span>
-                                        <span data-label="r" style={{ "--i": 8 } as React.CSSProperties}>r</span>
-                                        <span data-label="t" style={{ "--i": 9 } as React.CSSProperties}>t</span>
-                                        <span data-label="e" style={{ "--i": 10 } as React.CSSProperties}>e</span>
-                                        <span data-label="d" style={{ "--i": 11 } as React.CSSProperties}>d</span>
+                                        <span data-label="L" style={{ "--i": 1 } as React.CSSProperties}>L</span>
+                                        <span data-label="i" style={{ "--i": 2 } as React.CSSProperties}>i</span>
+                                        <span data-label="g" style={{ "--i": 3 } as React.CSSProperties}>g</span>
+                                        <span data-label="h" style={{ "--i": 4 } as React.CSSProperties}>h</span>
+                                        <span data-label="t" style={{ "--i": 5 } as React.CSSProperties}>t</span>
                                     </span>
 
                                     <span className="st-text st-state-2">
-                                        <span data-label="L" style={{ "--i": 1 } as React.CSSProperties}>L</span>
-                                        <span data-label="e" style={{ "--i": 2 } as React.CSSProperties}>e</span>
-                                        <span data-label="t" style={{ "--i": 3 } as React.CSSProperties}>t</span>
-                                        <span data-label="'" style={{ "--i": 4 } as React.CSSProperties}>'</span>
-                                        <span data-label="s" style={{ "--i": 5 } as React.CSSProperties}>s</span>
-                                        <span data-label="&nbsp;" style={{ "--i": 6 } as React.CSSProperties}>&nbsp;</span>
-                                        <span data-label="G" style={{ "--i": 7 } as React.CSSProperties}>G</span>
-                                        <span data-label="o" style={{ "--i": 8 } as React.CSSProperties}>o</span>
-                                        <span data-label="!" style={{ "--i": 9 } as React.CSSProperties}>!</span>
+                                        <span data-label="D" style={{ "--i": 1 } as React.CSSProperties}>D</span>
+                                        <span data-label="a" style={{ "--i": 2 } as React.CSSProperties}>a</span>
+                                        <span data-label="r" style={{ "--i": 3 } as React.CSSProperties}>r</span>
+                                        <span data-label="k" style={{ "--i": 4 } as React.CSSProperties}>k</span>
                                     </span>
                                 </span>
                             </div>

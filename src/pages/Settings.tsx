@@ -1,8 +1,10 @@
+ import { useTheme } from "next-themes";
+import { ScrewToggle } from "@/components/ui/screw-toggle";
 import { Header } from "@/components/Header";
 import { FloatingNav } from "@/components/FloatingNav";
 import { Section } from "@/components/Section";
 import {
-  Globe, Bell, Shield, Moon, Trash2, LogOut,
+  Globe, Bell, Shield, Moon, Trash2,
   ChevronRight, Github, Clock, Eye, RefreshCw, Download
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -10,16 +12,18 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { signOut, authClient, useSession } from "@/lib/auth-client";
-
-// ... (existing helper function/interface code)
+import { authClient, useSession } from "@/lib/auth-client";
 
 export default function Settings() {
+  // 1. Theme hook inserted correctly here
+  const { theme, setTheme } = useTheme(); 
+  
   const [timezone, setTimezone] = useState("America/Los_Angeles");
   const [notifications, setNotifications] = useState(true);
   const [emailDigest, setEmailDigest] = useState(true);
   const [publicProfile, setPublicProfile] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
+  // removed unused [darkMode, setDarkMode] state
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
@@ -41,7 +45,6 @@ export default function Settings() {
       try {
         const accounts = await authClient.listAccounts();
         if (accounts.data) {
-          // Fix provider check for TypeScript
           const hasGithub = accounts.data.some((acc) => acc.providerId === "github");
           setIsGithubConnected(hasGithub);
         }
@@ -64,7 +67,6 @@ export default function Settings() {
         });
         if (res.ok) {
           const data = await res.json();
-          // Rely on listAccounts for connection status, but use this for username/public toggle
           if (data.user) {
             setGithubUsername(data.user.username);
             if (typeof data.user.isPublic !== 'undefined') setPublicProfile(data.user.isPublic);
@@ -87,7 +89,6 @@ export default function Settings() {
     "Australia/Sydney",
   ];
 
-  /* Helper to ensure correct URL in production */
   const getBaseURL = (url: string) => {
     if (url.startsWith("http://") || url.startsWith("https://")) return url;
     if (url.includes("localhost") || url.includes("127.0.0.1")) return `http://${url}`;
@@ -106,7 +107,6 @@ export default function Settings() {
           const err = await res.json();
           throw new Error(err.message || "Failed to sync");
         }
-        // Reload to show changes
         setTimeout(() => window.location.reload(), 1000);
       })(),
       {
@@ -128,7 +128,6 @@ export default function Settings() {
     );
   };
 
-  // Connect GitHub
   const handleConnectGithub = async () => {
     try {
       await authClient.signIn.social({
@@ -141,7 +140,6 @@ export default function Settings() {
     }
   };
 
-  // Disconnect GitHub (Show Info)
   const handleDisconnectClick = () => {
     setShowDisconnectInfo(true);
   };
@@ -158,7 +156,6 @@ export default function Settings() {
       <Header />
 
       <main className="container pt-24 pb-32 md:pb-12 space-y-8">
-        {/* Page Header */}
         <section className="animate-fade-in">
           <h1 className="text-3xl font-bold text-gradient">Settings</h1>
           <p className="text-muted-foreground mt-1">Manage your preferences</p>
@@ -168,11 +165,9 @@ export default function Settings() {
 
           {/* Left Column */}
           <div className="space-y-6">
-            {/* Account Section */}
             <Section title="Account" className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
               <div className="space-y-1 rounded-xl border border-border overflow-hidden">
 
-                {/* GitHub Connection */}
                 <div className="flex items-center justify-between p-4 bg-secondary/30 hover:bg-secondary/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
@@ -202,7 +197,6 @@ export default function Settings() {
                   )}
                 </div>
 
-                {/* Refresh Data */}
                 <button
                   onClick={handleRefreshData}
                   className="w-full flex items-center justify-between p-4 bg-secondary/30 hover:bg-secondary/50 transition-colors"
@@ -219,7 +213,6 @@ export default function Settings() {
                   <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 </button>
 
-                {/* Export Data */}
                 <button
                   onClick={handleExportData}
                   className="w-full flex items-center justify-between p-4 bg-secondary/30 hover:bg-secondary/50 transition-colors"
@@ -238,10 +231,8 @@ export default function Settings() {
               </div>
             </Section>
 
-            {/* Notifications Section */}
             <Section title="Notifications" className="animate-fade-up" style={{ animationDelay: "0.2s" }}>
               <div className="space-y-1 rounded-xl border border-border overflow-hidden">
-                {/* Push Notifications */}
                 <div className="flex items-center justify-between p-4 bg-secondary/30">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
@@ -269,7 +260,6 @@ export default function Settings() {
                   </button>
                 </div>
 
-                {/* Email Digest */}
                 <div className="flex items-center justify-between p-4 bg-secondary/30">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
@@ -302,10 +292,8 @@ export default function Settings() {
 
           {/* Right Column */}
           <div className="space-y-6">
-            {/* Preferences Section */}
             <Section title="Preferences" className="animate-fade-up" style={{ animationDelay: "0.15s" }}>
               <div className="space-y-1 rounded-xl border border-border overflow-hidden">
-                {/* Timezone */}
                 <div className="flex items-center justify-between p-4 bg-secondary/30">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
@@ -330,7 +318,7 @@ export default function Settings() {
                   </select>
                 </div>
 
-                {/* Dark Mode */}
+                {/* Dark Mode - Screw Toggle Implemented Here */}
                 <div className="flex items-center justify-between p-4 bg-secondary/30">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
@@ -341,29 +329,16 @@ export default function Settings() {
                       <p className="text-sm text-muted-foreground">Always on (we love dark mode)</p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => {
-                      setDarkMode(!darkMode);
-                      toast.success("Dark mode is the only way!");
-                    }}
-                    className={cn(
-                      "w-12 h-6 rounded-full p-1 transition-colors duration-300",
-                      darkMode ? "bg-primary" : "bg-muted"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-4 h-4 rounded-full bg-white transition-transform duration-300",
-                      darkMode ? "translate-x-6" : "translate-x-0"
-                    )} />
-                  </button>
+                  <ScrewToggle 
+                    checked={theme === 'dark'}
+                    onChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  />
                 </div>
               </div>
             </Section>
 
-            {/* Privacy Section */}
             <Section title="Privacy" className="animate-fade-up" style={{ animationDelay: "0.25s" }}>
               <div className="space-y-1 rounded-xl border border-border overflow-hidden">
-                {/* Public Profile */}
                 <div className="flex items-center justify-between p-4 bg-secondary/30">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
@@ -391,7 +366,6 @@ export default function Settings() {
                   </button>
                 </div>
 
-                {/* Show on Leaderboard */}
                 <div className="flex items-center justify-between p-4 bg-secondary/30">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
@@ -412,7 +386,6 @@ export default function Settings() {
               </div>
             </Section>
 
-            {/* Danger Zone */}
             <Section title="Danger Zone" className="animate-fade-up" style={{ animationDelay: "0.3s" }}>
               <div className="space-y-3">
                 {isGithubConnected && (
@@ -494,7 +467,6 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Version */}
         <div className="text-center text-xs text-muted-foreground animate-fade-up" style={{ animationDelay: "0.35s" }}>
           <p>Evergreeners v1.0.0</p>
           <p className="mt-1">Made with 💚 for developers</p>
